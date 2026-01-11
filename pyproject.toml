@@ -4,4 +4,24 @@ version = "0.1.0"
 description = "A tool to build Domjudge competitions"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "pydantic>=2.12.5",
+    "python-dateutil>=2.9.0.post0",
+    "pytz>=2025.2",
+    "pyyaml>=6.0.3",
+    "requests>=2.32.5",
+]
+
+[tool.ruff]
+line-length = 120
+
+[project.scripts]
+programming-competition-creator = "programming_competition_creator.cli:main"
+progcc = "programming_competition_creator.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.23,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+data = ["src/programming_competition_creator/data"]

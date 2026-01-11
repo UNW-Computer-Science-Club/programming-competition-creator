@@ -1,0 +1,14 @@
+$schema: https://github.com/UNW-Computer-Science-Club/programming-competition-creator/competition.json
+name: Competition Name
+id: dj-5
+shortName: Short-Name
+timeZone: America/Chicago
+activateTime: Jan 16, 2026 12:00 AM
+startTime: 2:30 PM
+endTime: 3:30 PM
+problems:
+  - name: Hello World
+    shortname: helloworld
+    color: "#00FF00"
+    label: A
+    author: Your Name

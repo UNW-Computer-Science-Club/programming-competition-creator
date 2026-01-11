@@ -1,0 +1,11 @@
+# Replace this with a validator that will hold true for the input that the
+# contestant receives (see the Checktestdata spec:
+# https://github.com/DOMjudge/checktestdata/blob/main/doc/format-spec.md)
+
+# This is an example CTD file that matches nothing (for a hello world program
+# input)
+IF(ISEOF)
+    # Match nothing - we're already at EOF
+ELSE
+    NEWLINE  # Match exactly one newline
+END

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://unwcsclub.dev/schemas/competition.json",
+  "$ref": "#/definitions/Competition",
+  "definitions": {
+    "Competition": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the competition"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the competition",
+          "pattern": "[a-z0-9-]+"
+        },
+        "shortName": {
+          "type": "string",
+          "description": "Short name of the competition",
+          "pattern": "[_a-zA-Z0-9-]+"
+        },
+        "timeZone": {
+          "type": "string",
+          "description": "Time zone of the competition"
+        },
+        "activateTime": {
+          "type": "string",
+          "description": "The time when users can see the competition; Must be an absolute date time, but the format can vary."
+        },
+        "startTime": {
+          "type": "string",
+          "description": "The time when the competition starts; Can either be the time of day (relative to `activateTime`) or an absolute date time."
+        },
+        "endTime": {
+          "type": "string",
+          "description": "The time when the competition ends; Can either be the time of day (relative to `activateTime`) or an absolute date time."
+        },
+        "problems": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Problem"
+          }
+        }
+      },
+      "required": [
+        "activateTime",
+        "endTime",
+        "id",
+        "name",
+        "problems",
+        "shortName",
+        "startTime",
+        "timeZone"
+      ],
+      "title": "Competition",
+      "description": "A DOMJudge programming competition"
+    },
+    "Problem": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the problem"
+        },
+        "shortname": {
+          "type": "string",
+          "pattern": "[a-z0-9]+",
+          "description": "A short name of the problem with no spaces"
+        },
+        "label": {
+          "type": "string",
+          "description": "A short label that identifies the problem, e.g. \"A\"."
+        },
+        "color": {
+          "type": "string",
+          "pattern": "[A-Fa-f0-9]{6}",
+          "description": "The hex color of the problem icon"
+        },
+        "author": {
+          "type": "string",
+          "description": "The author of this problem"
+        },
+        "uuid": {
+          "type": "string",
+          "pattern": "[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{4}-[A-Fa-f0-9]{12}",
+          "description": "A unique identifier for the problem"
+        }
+      },
+      "required": ["author", "color", "name", "shortname", "label"],
+      "title": "Problem",
+      "description": "A DOMJudge programming problem"
+    }
+  }
+}
