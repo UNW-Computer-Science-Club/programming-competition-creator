@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
 from typing import List, Optional
-from uuid import UUID, uuid4
 
 import pytz
 import yaml
 from dateutil.parser import parse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class ProblemTestCase(BaseModel):
@@ -16,7 +15,6 @@ class ProblemTestCase(BaseModel):
 class Problem(BaseModel):
     name: str
     shortname: str
-    uuid: UUID = Field(default_factory=uuid4)
     color: str
     author: str
     label: str
@@ -25,7 +23,6 @@ class Problem(BaseModel):
         return {
             "problem_format_version": "legacy-icpc",
             "name": self.name,
-            "uuid": str(self.uuid),
             "author": self.author,
             "source": contest_name,
             "license": "educational",

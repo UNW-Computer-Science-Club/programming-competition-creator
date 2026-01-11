@@ -30,7 +30,7 @@ def main():
     elif args.command == "build":
         build(args)
     elif args.command == "scaffold":
-        scaffold(args)
+        scaffold(args, arg_parser.format_help())
     elif args.command == "test":
         test(args)
 

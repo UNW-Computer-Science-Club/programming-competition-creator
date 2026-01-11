@@ -1,4 +1,4 @@
-$schema: https://github.com/UNW-Computer-Science-Club/programming-competition-creator/competition.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/UNW-Computer-Science-Club/programming-competition-creator/refs/heads/main/schemas/competition.json
 name: Competition Name
 id: dj-5
 shortName: Short-Name

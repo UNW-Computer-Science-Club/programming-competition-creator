@@ -19,7 +19,7 @@ that the user has not created any problems yet. They may want you to do that.
 The `competition.yaml` file should adhere to the following spec:
 
 ```json
-$competition_yaml_spec
+$competition_json_spec
 ```
 
 Each problem defined in the competition file must have a directory named after

@@ -5,11 +5,10 @@ from string import Template
 import requests
 
 from programming_competition_creator import Competition
-from programming_competition_creator.cli import arg_parser
 from programming_competition_creator.utils import get_file_contents
 
 
-def scaffold(args):
+def scaffold(args, help_text):
     competition = Competition.read()
 
     output_dir = Path("problems")
@@ -47,7 +46,18 @@ def scaffold(args):
 
     agents_md_path = Path("AGENTS.md")
 
-    competition_json_spec = requests.get("https://example.com/competition.json").text()
+    competition_json_spec = requests.get(
+        "https://raw.githubusercontent.com/UNW-Computer-Science-Club/programming-competition-creator/refs/heads/main/schemas/competition.json"
+    ).text
+
+    checktestdata_spec = requests.get(
+        "https://raw.githubusercontent.com/DOMjudge/checktestdata/refs/heads/main/doc/format-spec.md"
+    ).text
+
     agents_md_path.write_text(
-        Template(get_file_contents("agents-md-template.md")).substitute(program_usage=arg_parser.format_help())
+        Template(get_file_contents("agents-md-template.md")).substitute(
+            program_usage=help_text,
+            competition_json_spec=competition_json_spec,
+            checktestdata_spec=checktestdata_spec,
+        )
     )
