@@ -4,6 +4,7 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import List
+from zipfile import ZipFile
 
 from ruamel.yaml import YAML
 
@@ -111,3 +112,13 @@ def build(args):
 
     for handle in pandoc_handles:
         handle.wait()
+
+    for file in output_dir.glob("*.zip"):
+        shutil.rmtree(file, ignore_errors=True)
+
+    for problem in competition.problems:
+        problems_out_dir = output_dir / "problems"
+
+        with ZipFile(problems_out_dir / f"{problem.shortname}.zip", "w") as zip_file:
+            for file in problem_out_dir.rglob("*"):
+                zip_file.write(file, file.relative_to(problem_out_dir))
