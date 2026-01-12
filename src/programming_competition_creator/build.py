@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 from typing import List
 
-import yaml
+from ruamel.yaml import YAML
 
 from programming_competition_creator.competition import Competition, ProblemTestCase
 
@@ -18,10 +18,10 @@ def build(args):
     output_dir.mkdir(exist_ok=True)
 
     with open(output_dir / "contest.yaml", "w") as f:
-        yaml.dump(competition.to_domjudge(), f)
+        YAML().dump(competition.to_domjudge(), f)
 
     with open(output_dir / "problems.yaml", "w") as f:
-        yaml.dump(competition.to_domjudge_problem_metadata(), f)
+        YAML().dump(competition.to_domjudge_problem_metadata(), f)
 
     for problem_dir in output_dir.iterdir():
         if problem_dir.is_dir():
@@ -40,7 +40,7 @@ def build(args):
         problem_out_dir.mkdir(exist_ok=True)
 
         with open(problem_out_dir / "problem.yaml", "w") as f:
-            yaml.dump(problem.to_domjudge(competition.name), f)
+            YAML().dump(problem.to_domjudge(competition.name), f)
 
         solution_out_dir = problem_out_dir / "submissions" / "accepted"
         solution_out_dir.mkdir(exist_ok=True, parents=True)

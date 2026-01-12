@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Type
+from uuid import UUID, uuid4
 
 import pytz
-import yaml
 from dateutil.parser import parse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from ruamel.yaml import YAML
 
 
 class ProblemTestCase(BaseModel):
@@ -15,6 +16,7 @@ class ProblemTestCase(BaseModel):
 class Problem(BaseModel):
     name: str
     shortname: str
+    uuid: UUID = Field(default_factory=uuid4)
     color: str
     author: str
     label: str
@@ -74,10 +76,23 @@ class Competition(BaseModel):
         )
 
     @classmethod
-    def read(cls) -> "Competition":
+    def read(cls: Type["Competition"]) -> "Competition":
+        competition_yaml = YAML()
         with open("competition.yaml", "r") as f:
-            data = yaml.safe_load(f)
-        return cls.create_from_dict(data)
+            data = competition_yaml.load(f)
+
+        result = cls.create_from_dict(data)
+
+        did_edit = False
+        for idx, problem in enumerate(data["problems"]):
+            if not problem.get("uuid"):
+                problem["uuid"] = str(result.problems[idx].uuid)
+                did_edit = True
+        if did_edit:
+            with open("competition.yaml", "w") as f:
+                competition_yaml.dump(data, f)
+
+        return result
 
     @property
     def duration(self) -> timedelta:

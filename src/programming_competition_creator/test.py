@@ -4,7 +4,7 @@ from glob import glob
 from pathlib import Path
 from typing import cast
 
-import yaml
+from ruamel.yaml import YAML
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +18,16 @@ def test(args):
     subprocess.run(["docker", "pull", "problemtools/icpc"], check=True)
 
     # verifyproblem doesn't like the `legacy-icpc` format, so we need to replace it with `legacy`
+    yaml_records = {}
     for file in glob(str(abs_path / "problems") + "/**/problem.yaml"):
         with open(file, "r") as f:
-            content = yaml.safe_load(f)
+            yaml_record = YAML()
+            yaml_records[file] = yaml_record
+            content = yaml_record.load(f)
         if content.get("problem_format_version") == "legacy-icpc":
             content["problem_format_version"] = "legacy"
         with open(file, "w") as f:
-            yaml.dump(content, f)
+            yaml_record.dump(content, f)
 
     try:
         for i, dir in enumerate(dirs):
@@ -57,10 +60,13 @@ def test(args):
         for handle in subprocess_handles:
             handle.wait()
     finally:
+        yaml_records = {}
         for file in glob(str(abs_path / "problems") + "/**/problem.yaml"):
             with open(file, "r") as f:
-                content = yaml.safe_load(f)
+                yaml_record = YAML()
+                yaml_records[file] = yaml_record
+                content = yaml_record.load(f)
             if content.get("problem_format_version") == "legacy":
                 content["problem_format_version"] = "legacy-icpc"
             with open(file, "w") as f:
-                yaml.dump(content, f)
+                yaml_record.dump(content, f)
