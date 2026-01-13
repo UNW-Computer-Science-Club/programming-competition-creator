@@ -1,3 +1,5 @@
+import asyncio
+import asyncio.subprocess
 import importlib.util
 import re
 import shutil
@@ -11,7 +13,39 @@ from ruamel.yaml import YAML
 from programming_competition_creator.competition import Competition, ProblemTestCase
 
 
-def build(args):
+def ensure_trailing_newline(string: str) -> str:
+    return string + "\n" if not string.endswith("\n") else string
+
+
+async def run_pandoc(outfile: str, input_document: str, options: List[str] = []):
+    cmd = [
+        "pandoc",
+        "--from",
+        "markdown",
+        "--to",
+        "pdf",
+        "--pdf-engine=lualatex",
+        "--template",
+        "eisvogel",
+        "-o",
+        outfile,
+    ]
+    cmd.extend(options)
+
+    proc = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdin=asyncio.subprocess.PIPE,
+    )
+
+    proc.stdin.write(input_document.encode())
+    await proc.stdin.drain()
+
+    proc.stdin.close()
+
+    await proc.wait()
+
+
+async def build(args):
     competition = Competition.read()
 
     output_dir = Path(args.output_dir)
@@ -30,7 +64,7 @@ def build(args):
             if problem is None:
                 shutil.rmtree(problem_dir)
 
-    pandoc_handles = []
+    pandoc_tasks = []
 
     for problem in competition.problems:
         problems_out_dir = output_dir / "problems"
@@ -81,12 +115,7 @@ def build(args):
         test_data_secret_dir = test_data_dir / "secret"
         test_data_secret_dir.mkdir(exist_ok=True)
 
-        for case_index, case in enumerate(solutions):
-            with open(test_data_secret_dir / f"{case_index}.in", "w") as f:
-                f.write(case.input)
-
-            with open(test_data_secret_dir / f"{case_index}.ans", "w") as f:
-                f.write(case.answer)
+        inputs = set()
 
         statement_out_dir = problem_out_dir / "problem_statement"
         statement_out_dir.mkdir(exist_ok=True)
@@ -99,25 +128,37 @@ def build(args):
         idx = 0
         for match in regex.finditer(statement):
             with open(test_data_example_dir / f"{idx}.{match.group(1).lower()}", "x") as f:
-                f.write(match.group(2))
+                normalized = ensure_trailing_newline(match.group(2))
+                f.write(normalized)
+                inputs.add(normalized)
             if match.group(1) == "ANS":
                 idx += 1
 
+        for case_index, case in enumerate(solutions):
+            normalized = ensure_trailing_newline(case.input)
+            if normalized in inputs:
+                continue
+
+            inputs.add(normalized)
+
+            with open(test_data_secret_dir / f"{case_index}.in", "w") as f:
+                f.write(normalized)
+
+            with open(test_data_secret_dir / f"{case_index}.ans", "w") as f:
+                f.write(ensure_trailing_newline(case.answer))
+
         filtered_statement = statement.replace("@TESTCASE_IN\n", "").replace("@TESTCASE_ANS\n", "")
 
-        handle = subprocess.Popen(["pandoc", "-o", str(statement_out_dir / "problem.tex")], stdin=subprocess.PIPE)
+        pandoc_tasks.append(run_pandoc(statement_out_dir / "problem.pdf", filtered_statement))
 
-        handle.communicate(input=filtered_statement.encode())
-        pandoc_handles.append(handle)
-
-    for handle in pandoc_handles:
-        handle.wait()
+    await asyncio.gather(*pandoc_tasks)
 
     for file in output_dir.glob("*.zip"):
         shutil.rmtree(file, ignore_errors=True)
 
+    problems_out_dir = output_dir / "problems"
     for problem in competition.problems:
-        problems_out_dir = output_dir / "problems"
+        problem_out_dir = problems_out_dir / problem.shortname
 
         with ZipFile(problems_out_dir / f"{problem.shortname}.zip", "w") as zip_file:
             for file in problem_out_dir.rglob("*"):

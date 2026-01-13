@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 import logging
 
 from programming_competition_creator import build, init, scaffold, test
@@ -20,19 +21,33 @@ scaffold_args.add_argument("-P", "--purge", action="store_true", help="Removes p
 
 test_args = subparsers.add_parser("test", help="Test the problem archives")
 test_args.add_argument("--build-dir", default="build", help="Directory containing the built problems")
+test_args.add_argument("--problem", type=str, help="Problem to test")
+test_args.add_argument("-j", "--jobs", type=int, default=1, help="Number of jobs to run in parallel")
+test_args.add_argument(
+    "--parts",
+    "-p",
+    type=str,
+    choices=["config", "data", "graders", "statement", "submissions", "validators"],
+    nargs="+",
+    help="Parts to test",
+)
 
 
-def main():
+async def async_main():
     args = arg_parser.parse_args()
 
     if args.command == "init":
-        init(args)
+        init(args, arg_parser.format_help())
     elif args.command == "build":
-        build(args)
+        await build(args)
     elif args.command == "scaffold":
-        scaffold(args, arg_parser.format_help())
+        scaffold(args)
     elif args.command == "test":
         test(args)
+
+
+def main():
+    asyncio.run(async_main())
 
 
 if __name__ == "__main__":

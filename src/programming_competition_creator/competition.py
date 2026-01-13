@@ -28,6 +28,7 @@ class Problem(BaseModel):
             "author": self.author,
             "source": contest_name,
             "license": "educational",
+            "uuid": str(self.uuid),
         }
 
     def to_domjudge_metadata(self: "Problem") -> dict:
@@ -36,6 +37,7 @@ class Problem(BaseModel):
             "label": self.label,
             "name": self.name,
             "rgb": self.color,
+            "uuid": str(self.uuid),
         }
 
 

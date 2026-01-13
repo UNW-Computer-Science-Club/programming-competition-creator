@@ -2,13 +2,11 @@ import shutil
 from pathlib import Path
 from string import Template
 
-import requests
-
 from programming_competition_creator import Competition
 from programming_competition_creator.utils import get_file_contents
 
 
-def scaffold(args, help_text):
+def scaffold(args):
     competition = Competition.read()
 
     output_dir = Path("problems")
@@ -43,21 +41,3 @@ def scaffold(args, help_text):
         sanity_checker_path = problem_dir / "sanitychecker.ctd"
         if not sanity_checker_path.exists():
             sanity_checker_path.write_text(get_file_contents("ctd-template.ctd"))
-
-    agents_md_path = Path("AGENTS.md")
-
-    competition_json_spec = requests.get(
-        "https://raw.githubusercontent.com/UNW-Computer-Science-Club/programming-competition-creator/refs/heads/main/schemas/competition.json"
-    ).text
-
-    checktestdata_spec = requests.get(
-        "https://raw.githubusercontent.com/DOMjudge/checktestdata/refs/heads/main/doc/format-spec.md"
-    ).text
-
-    agents_md_path.write_text(
-        Template(get_file_contents("agents-md-template.md")).substitute(
-            program_usage=help_text,
-            competition_json_spec=competition_json_spec,
-            checktestdata_spec=checktestdata_spec,
-        )
-    )
