@@ -4,12 +4,7 @@ from glob import glob
 from pathlib import Path
 from typing import cast
 
-TERM_YELLOW = "\033[33m"
-TERM_RESET = "\033[0m"
-
 from ruamel.yaml import YAML
-
-from programming_competition_creator.utils import get_file_contents
 
 logger = logging.getLogger(__name__)
 
@@ -49,11 +44,6 @@ def test(args):
                 subprocess_handles.pop(0)
 
             logger.debug(f"Starting verification for {dir}")
-
-            if dir.name != "helloworld" and (
-                Path("problems") / dir.name / "sanitychecker.ctd"
-            ).read_text() == get_file_contents("ctd-template.ctd"):
-                print(f"{TERM_YELLOW}WARNING: The problem {dir.name} still has the template statement.{TERM_RESET}")
 
             docker_args = [
                 "docker",

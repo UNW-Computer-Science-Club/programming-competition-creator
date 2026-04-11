@@ -37,7 +37,3 @@ def scaffold(args):
         generator_path = problem_dir / "generator.py"
         if not generator_path.exists():
             generator_path.write_text(get_file_contents("generator-template.py"))
-
-        sanity_checker_path = problem_dir / "sanitychecker.ctd"
-        if not sanity_checker_path.exists():
-            sanity_checker_path.write_text(get_file_contents("ctd-template.ctd"))

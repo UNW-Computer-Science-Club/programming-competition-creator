@@ -28,8 +28,8 @@ have a directory called `problems/helloworld`. You don't have to do this
 manually. Running `progcc scaffold` will take the `competition.yaml` file and
 create the necessary directories for each problem.
 
-Each directory will have four files: `generator.py`, `solution.py`,
-`statement.md`, and `sanitychecker.ctd`.
+Each directory will have three files: `generator.py`, `solution.py`, and
+`statement.md`.
 
 `generator.py` must have a `generate` function that takes no arguments and
 returns a `list` of `dicts` that each have an `input` and `answer` key. You
@@ -67,9 +67,5 @@ Note the `@TESTCASE_IN` and `@TESTCASE_ANS` tags. These will be removed when the
 competitor sees the document. They are only used to generate test cases so that
 the statement stays in sync with the actual test cases.
 
-`sanitychecker.ctd` must contain a Checktestdata-formatted input validator. That
-means it will validate the `input` data, not the competitor's `answer`.
-
-Here is the Checktestdata language specification:
-
-$checktestdata_spec
+When building DOMjudge output, the tool emits a dummy input validator that
+always exits successfully.

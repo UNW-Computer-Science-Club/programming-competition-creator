@@ -88,7 +88,7 @@ async def build(args):
         input_validator_out_dir = problem_out_dir / "input_validators"
         input_validator_out_dir.mkdir(exist_ok=True)
 
-        shutil.copyfile(problem_in_dir / "sanitychecker.ctd", input_validator_out_dir / "input_validator.ctd")
+        (input_validator_out_dir / "input_validator.py").write_text("exit(42)\n")
 
         spec = importlib.util.spec_from_file_location("generator", problem_in_dir / "generator.py")
 
