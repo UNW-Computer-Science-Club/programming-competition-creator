@@ -3,7 +3,6 @@ import asyncio.subprocess
 import importlib.util
 import re
 import shutil
-import subprocess
 from pathlib import Path
 from typing import List
 from zipfile import ZipFile
@@ -17,7 +16,7 @@ def ensure_trailing_newline(string: str) -> str:
     return string + "\n" if not string.endswith("\n") else string
 
 
-async def run_pandoc(outfile: str, input_document: str, options: List[str] = []):
+async def run_pandoc(outfile: Path, input_document: str, options: List[str] = []):
     cmd = [
         "pandoc",
         "--from",
@@ -28,7 +27,7 @@ async def run_pandoc(outfile: str, input_document: str, options: List[str] = [])
         "--template",
         "eisvogel",
         "-o",
-        outfile,
+        str(outfile),
     ]
     cmd.extend(options)
 
@@ -36,6 +35,9 @@ async def run_pandoc(outfile: str, input_document: str, options: List[str] = [])
         *cmd,
         stdin=asyncio.subprocess.PIPE,
     )
+
+    if proc.stdin is None:
+        raise RuntimeError("pandoc stdin was not created")
 
     proc.stdin.write(input_document.encode())
     await proc.stdin.drain()
@@ -58,19 +60,20 @@ async def build(args):
     with open(output_dir / "problems.yaml", "w") as f:
         YAML().dump(competition.to_domjudge_problem_metadata(), f)
 
-    for problem_dir in output_dir.iterdir():
-        if problem_dir.is_dir():
-            problem = competition.get_problem_by_shortname(problem_dir.name)
-            if problem is None:
-                shutil.rmtree(problem_dir)
+    problems_out_dir = output_dir / "problems"
+    problems_out_dir.mkdir(exist_ok=True)
+
+    expected_problem_ids = {competition.problem_shortname_for_domjudge(problem) for problem in competition.problems}
+    for problem_dir in problems_out_dir.iterdir():
+        if problem_dir.is_dir() and problem_dir.name not in expected_problem_ids:
+            shutil.rmtree(problem_dir)
 
     pandoc_tasks = []
 
     for problem in competition.problems:
-        problems_out_dir = output_dir / "problems"
-        problems_out_dir.mkdir(exist_ok=True)
+        domjudge_problem_id = competition.problem_shortname_for_domjudge(problem)
 
-        problem_out_dir = problems_out_dir / problem.shortname
+        problem_out_dir = problems_out_dir / domjudge_problem_id
         problem_in_dir = Path("problems") / problem.shortname
         problem_out_dir.mkdir(exist_ok=True)
 
@@ -149,6 +152,7 @@ async def build(args):
 
         filtered_statement = statement.replace("@TESTCASE_IN\n", "").replace("@TESTCASE_ANS\n", "")
 
+        print("adding pandoc task")
         pandoc_tasks.append(run_pandoc(statement_out_dir / "problem.pdf", filtered_statement))
 
     await asyncio.gather(*pandoc_tasks)
@@ -156,10 +160,10 @@ async def build(args):
     for file in output_dir.glob("*.zip"):
         shutil.rmtree(file, ignore_errors=True)
 
-    problems_out_dir = output_dir / "problems"
     for problem in competition.problems:
-        problem_out_dir = problems_out_dir / problem.shortname
+        domjudge_problem_id = competition.problem_shortname_for_domjudge(problem)
+        problem_out_dir = problems_out_dir / domjudge_problem_id
 
-        with ZipFile(problems_out_dir / f"{problem.shortname}.zip", "w") as zip_file:
+        with ZipFile(problems_out_dir / f"{domjudge_problem_id}.zip", "w") as zip_file:
             for file in problem_out_dir.rglob("*"):
                 zip_file.write(file, file.relative_to(problem_out_dir))

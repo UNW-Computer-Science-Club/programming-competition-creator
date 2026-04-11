@@ -20,6 +20,10 @@
           "description": "Short name of the competition",
           "pattern": "[_a-zA-Z0-9-]+"
         },
+        "problemSuffix": {
+          "type": "string",
+          "description": "Suffix appended to each problem shortname in build output"
+        },
         "timeZone": {
           "type": "string",
           "description": "Time zone of the competition"

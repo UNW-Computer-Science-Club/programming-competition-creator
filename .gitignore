@@ -10,3 +10,5 @@ wheels/
 .venv
 
 test-workdir
+
+docs/domjudge

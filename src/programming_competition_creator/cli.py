@@ -2,7 +2,7 @@ import argparse
 import asyncio
 import logging
 
-from programming_competition_creator import build, init, scaffold, test
+from programming_competition_creator import build, init, publish, scaffold, test
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,6 +32,15 @@ test_args.add_argument(
     help="Parts to test",
 )
 
+publish_args = subparsers.add_parser("publish", help="Build and publish the competition to DOMjudge")
+publish_args.add_argument("--url", required=True, help="DOMjudge base URL")
+publish_args.add_argument("--username", required=True, help="DOMjudge API username")
+publish_args.add_argument("--password", required=True, help="DOMjudge API password")
+publish_args.add_argument("--contest-id", help="Existing contest ID to publish into")
+publish_args.add_argument("--build-dir", default="build", help="Directory containing built artifacts")
+publish_args.add_argument("--skip-build", action="store_true", help="Skip rebuilding before upload")
+publish_args.add_argument("--timeout", type=int, default=60, help="HTTP request timeout in seconds")
+
 
 async def async_main():
     args = arg_parser.parse_args()
@@ -44,6 +53,8 @@ async def async_main():
         scaffold(args)
     elif args.command == "test":
         test(args)
+    elif args.command == "publish":
+        await publish(args)
 
 
 def main():

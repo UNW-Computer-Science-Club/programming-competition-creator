@@ -31,9 +31,9 @@ class Problem(BaseModel):
             "uuid": str(self.uuid),
         }
 
-    def to_domjudge_metadata(self: "Problem") -> dict:
+    def to_domjudge_metadata(self: "Problem", problem_id: str) -> dict:
         return {
-            "id": self.shortname,
+            "id": problem_id,
             "label": self.label,
             "name": self.name,
             "rgb": self.color,
@@ -45,6 +45,7 @@ class Competition(BaseModel):
     name: str
     id: str
     shortName: str
+    problemSuffix: str = ""
     activateTime: datetime
     startTime: datetime
     endTime: datetime
@@ -71,6 +72,7 @@ class Competition(BaseModel):
             name=data["name"],
             id=data["id"],
             shortName=data["shortName"],
+            problemSuffix=data.get("problemSuffix", ""),
             activateTime=activate_time,
             startTime=start_datetime,
             endTime=end_datetime,
@@ -112,7 +114,10 @@ class Competition(BaseModel):
         }
 
     def to_domjudge_problem_metadata(self: "Competition") -> List[dict]:
-        return [x.to_domjudge_metadata() for x in self.problems]
+        return [x.to_domjudge_metadata(self.problem_shortname_for_domjudge(x)) for x in self.problems]
+
+    def problem_shortname_for_domjudge(self: "Competition", problem: Problem) -> str:
+        return f"{problem.shortname}{self.problemSuffix}" if self.problemSuffix else problem.shortname
 
     def get_problem_by_shortname(self, shortname: str) -> Optional[Problem]:
         for problem in self.problems:

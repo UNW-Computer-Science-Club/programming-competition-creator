@@ -2,6 +2,7 @@
 name: Competition Name
 id: dj-5
 shortName: Short-Name
+problemSuffix: ""
 timeZone: America/Chicago
 activateTime: Jan 16, 2026 12:00 AM
 startTime: 2:30 PM
