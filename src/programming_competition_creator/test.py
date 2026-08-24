@@ -49,7 +49,7 @@ async def test(args):
         run_jobs: list[tuple[Path, list[str]]] = []
 
         for dir in dirs:
-            if args.problem and dir.name != args.problem:
+            if args.problem and not dir.name.startswith(args.problem):
                 continue
             elif args.problem:
                 problem_found = True
